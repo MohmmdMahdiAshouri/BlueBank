@@ -1,32 +1,37 @@
 # BlueBank Monorepo
 
-یک پلتفرم نئوبانک Production-Ready و تمام‌عیار، توسعه داده‌شده با معماری **Turborepo** و **pnpm Workspaces**.
+یک پلتفرم نئوبانک Production-Ready توسعه داده‌شده با معماری **Turborepo** و **pnpm Workspaces** با آخرین نسخه‌های اکوسیستم مدرن جاوااسکریپت و تایپ‌اسکریپت.
 
 ---
 
 ## 🏛 معماری پروژه (System Architecture)
 
-این ساختار شامل تفکیک دقیق دامنه‌ها، پکیج‌های اشتراکی تایپ‌سیف و میکروسرویس‌های فرانت‌اند و بک‌اند است:
-
 ```text
 .
 ├── apps/
-│   ├── client/           # فرانت‌اند کاربری - Next.js (App Router) + TypeScript [Port: 3000]
-│   ├── panel/            # داشبورد مدیریت و مانیتورینگ - Vite + React + TypeScript [Port: 3001]
-│   └── core-banking/     # هسته پردازش بانکی - NestJS + TypeScript (SWC) [Port: 4000]
+│   ├── client/           # فرانت‌اند کاربری - Next.js 16 (App Router) + TypeScript [Port: 3000]
+│   ├── panel/            # داشبورد مدیریت و مانیتورینگ - Vite 8 + React 19 + TypeScript [Port: 3001]
+│   └── core-banking/     # هسته پردازش بانکی - NestJS 12 + TypeScript (SWC) [Port: 4000]
 └── packages/
-    ├── contracts/        # قراردادهای DTO، اسکیماهای Zod و ساختار ApiResponse/Error (CJS/ESM)
-    ├── ui/               # پکیج کامپوننت‌ها و توکن‌های طراحی JIT بدون بیلد
+    ├── contracts/        # قراردادهای DTO، اسکیماهای Zod 4 و ساختار ApiResponse/Error (CJS/ESM)
     ├── typescript-config/# کانفیگ‌های اشتراکی TypeScript (base, nextjs, vite-react, nestjs)
     └── eslint-config/    # کانفیگ اشتراکی ESLint Flat Config + Prettier
 ```
 
 ---
 
-## 🚀 پیش‌نیازها
+## 🚀 پیش‌نیازها و نسخه‌ها
 
-- **Node.js**: `^20.0.0 || ^22.0.0 || ^24.0.0` (قفل شده روی `v24.18.0` در `.nvmrc`)
-- **pnpm**: `^10.0.0 || ^11.0.0` (قفل شده در `packageManager`)
+- **Node.js**: `v24.18.0` (قفل شده در `.nvmrc`)
+- **pnpm**: `v11.24.0` (قفل شده در `packageManager`)
+- **Next.js**: `v16.4.6`
+- **React**: `v19.3.1`
+- **Vite**: `v8.3.8`
+- **NestJS**: `v12.6.0`
+- **TypeScript**: `v7.0.2`
+- **Turborepo**: `v2.11.13`
+- **Zod**: `v4.6.7`
+- **ESLint**: `v10.15.0`
 
 ---
 
@@ -47,10 +52,6 @@
 
 ---
 
-## 🛡 کنترل کیفیت و استانداردهای توسعه (DX & CI)
+## 🛡 قوانین ایجنت‌ها و کیفیت کد
 
-- **Husky & lint-staged**: اعتبارسنجی خودکار فرمت و استانداردهای لنتینگ قبل از هر کامیت.
-- **Commitlint**: الزام رعایت قواعد [Conventional Commits](https://www.conventionalcommits.org/).
-- **Fail-Fast Environment Validation**: اعتبارسنجی کلیه متغیرهای محیطی در لحظه راه‌اندازی (Boot Time) با **Zod**.
-- **Zero-Friction Integration**: کامپایل دوگانه CJS/ESM در `@repo/contracts` و HMR بی‌درنگ در `@repo/ui` بدون نیاز به ریست سرور.
-- **Docker-Ready**: سازگاری کامل با `turbo prune <app> --docker` جهت بیلدهای کم‌حجم Multi-stage در محیط کانتینر.
+- مطابق با قانون مندرج در `AGENTS.md`، تمام فرآیندها مبتنی بر اصل **One Prompt, One Review, One Commit** کنترل می‌شوند.

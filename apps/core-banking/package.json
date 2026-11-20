@@ -11,24 +11,24 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@nestjs/common": "^11.0.0",
-    "@nestjs/core": "^11.0.0",
-    "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/common": "^12.6.0",
+    "@nestjs/core": "^12.6.0",
+    "@nestjs/platform-express": "^12.6.0",
     "@repo/contracts": "workspace:*",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1",
-    "zod": "^3.24.2"
+    "rxjs": "^7.8.2",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@nestjs/cli": "^11.0.0",
-    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/cli": "^12.0.15",
+    "@nestjs/schematics": "^12.0.16",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@swc/cli": "^0.6.0",
-    "@swc/core": "^1.10.0",
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.10.0",
-    "eslint": "^9.20.0",
-    "typescript": "^5.8.2"
+    "@swc/cli": "^0.8.2",
+    "@swc/core": "^1.16.22",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.15.0",
+    "typescript": "^6.0.3"
   }
 }

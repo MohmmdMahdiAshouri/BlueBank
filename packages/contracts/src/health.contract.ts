@@ -16,6 +16,6 @@ export const HealthCheckDataSchema = z.object({
   uptime: z.number().nonnegative(),
   version: z.string(),
   timestamp: z.string(),
-  services: z.record(ServiceHealthSchema).optional(),
+  services: z.record(z.string(), ServiceHealthSchema).optional(),
 });
 export type HealthCheckData = z.infer<typeof HealthCheckDataSchema>;

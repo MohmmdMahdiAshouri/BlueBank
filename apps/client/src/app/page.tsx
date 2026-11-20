@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Button, Card, CardHeader, CardTitle, CardContent, Badge, colors, spacing } from '@repo/ui';
 import type { BankAccount, HealthCheckData } from '@repo/contracts';
 import { env } from '../env';
 
@@ -26,89 +25,136 @@ export default function ClientHomePage() {
   };
 
   return (
-    <main style={{ maxWidth: '960px', margin: '0 auto', padding: spacing.xl }}>
+    <main style={{ maxWidth: '960px', margin: '0 auto', padding: '32px' }}>
       <header
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: spacing.xl,
-          borderBottom: `1px solid ${colors.brand.border}`,
-          paddingBottom: spacing.md,
+          marginBottom: '32px',
+          borderBottom: '1px solid #E2E8F0',
+          paddingBottom: '16px',
         }}
       >
         <div>
-          <h1 style={{ margin: 0, color: colors.brand.primary, fontSize: '28px' }}>
-            BlueBank Client
-          </h1>
-          <p style={{ margin: '4px 0 0', color: colors.brand.textSecondary }}>
-            فرانت‌اند Next.js با App Router و ارتباط زنده با بک‌اند
+          <h1 style={{ margin: 0, color: '#0052FF', fontSize: '28px' }}>BlueBank Client</h1>
+          <p style={{ margin: '4px 0 0', color: '#64748B' }}>
+            فرانت‌اند مدرن Next.js 16 (App Router) و ارتباط یکپارچه با میکروسرویس Core Banking
           </p>
         </div>
-        <Badge variant={mockHealth.status === 'ok' ? 'success' : 'warning'}>
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: '4px 12px',
+            borderRadius: '9999px',
+            fontSize: '12px',
+            fontWeight: 600,
+            backgroundColor: mockHealth.status === 'ok' ? '#ECFDF5' : '#FFFBEB',
+            color: mockHealth.status === 'ok' ? '#10B981' : '#F59E0B',
+          }}
+        >
           {mockHealth.status === 'ok' ? 'سرویس متصل است' : 'اختلال در سرویس'}
-        </Badge>
+        </span>
       </header>
 
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: spacing.lg,
+          gap: '24px',
         }}
       >
-        <Card>
-          <CardHeader>
-            <CardTitle>موجودی حساب اصلی</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '16px',
+            padding: '24px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+            border: '1px solid #E2E8F0',
+          }}
+        >
+          <h3 style={{ margin: '0 0 16px', fontSize: '18px', color: '#0F172A' }}>
+            موجودی حساب اصلی
+          </h3>
+          <div style={{ fontSize: '28px', fontWeight: 800, color: '#0F172A', marginBottom: '8px' }}>
+            {mockAccount.balance.toLocaleString('fa-IR')}{' '}
+            <span style={{ fontSize: '14px', fontWeight: 500 }}>ریال</span>
+          </div>
+          <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>
+            شماره کارت: {mockAccount.accountNumber}
+          </p>
+          <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#64748B' }}>
+            صاحب حساب: {mockAccount.ownerName}
+          </p>
+          <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
+            <button
               style={{
-                fontSize: '28px',
-                fontWeight: 800,
-                color: colors.brand.textPrimary,
-                marginBottom: spacing.sm,
+                backgroundColor: '#0052FF',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontWeight: 600,
+                cursor: 'pointer',
               }}
             >
-              {mockAccount.balance.toLocaleString('fa-IR')}{' '}
-              <span style={{ fontSize: '14px', fontWeight: 500 }}>ریال</span>
-            </div>
-            <p style={{ margin: 0, fontSize: '13px' }}>شماره کارت: {mockAccount.accountNumber}</p>
-            <p style={{ margin: '4px 0 0', fontSize: '13px' }}>
-              صاحب حساب: {mockAccount.ownerName}
-            </p>
-            <div style={{ marginTop: spacing.md, display: 'flex', gap: spacing.sm }}>
-              <Button size="sm" variant="primary">
-                انتقال وجه
-              </Button>
-              <Button size="sm" variant="outline">
-                گردش حساب
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              انتقال وجه
+            </button>
+            <button
+              style={{
+                backgroundColor: 'transparent',
+                color: '#0F172A',
+                border: '1px solid #E2E8F0',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              گردش حساب
+            </button>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>اطلاعات زیرساخت Core Banking</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p style={{ margin: '4px 0', fontSize: '13px' }}>
-              آدرس API: <code>{env.NEXT_PUBLIC_API_URL}</code>
-            </p>
-            <p style={{ margin: '4px 0', fontSize: '13px' }}>
-              وضعیت سلامت: <Badge variant="success">فعال (200 OK)</Badge>
-            </p>
-            <p style={{ margin: '4px 0', fontSize: '13px' }}>
-              معماری: Monorepo با Turborepo & pnpm
-            </p>
-            <div style={{ marginTop: spacing.md }}>
-              <Button size="sm" variant="secondary" onClick={() => alert('تست اتصال برقرار است!')}>
-                تست مجدد اتصال
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '16px',
+            padding: '24px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+            border: '1px solid #E2E8F0',
+          }}
+        >
+          <h3 style={{ margin: '0 0 16px', fontSize: '18px', color: '#0F172A' }}>
+            اطلاعات زیرساخت Core Banking
+          </h3>
+          <p style={{ margin: '4px 0', fontSize: '13px', color: '#64748B' }}>
+            آدرس API: <code>{env.NEXT_PUBLIC_API_URL}</code>
+          </p>
+          <p style={{ margin: '4px 0', fontSize: '13px', color: '#64748B' }}>
+            فناوری فرانت‌اند: <strong>Next.js 16 (App Router)</strong>
+          </p>
+          <p style={{ margin: '4px 0', fontSize: '13px', color: '#64748B' }}>
+            معماری: Monorepo با Turborepo & pnpm
+          </p>
+          <div style={{ marginTop: '16px' }}>
+            <button
+              onClick={() => alert('تست اتصال به Core-Banking برقرار است!')}
+              style={{
+                backgroundColor: '#F4F7FB',
+                color: '#0F172A',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              تست مجدد اتصال
+            </button>
+          </div>
+        </div>
       </div>
     </main>
   );

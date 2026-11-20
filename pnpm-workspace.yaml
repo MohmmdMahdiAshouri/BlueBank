@@ -4,3 +4,9 @@ packages:
 allowBuilds:
   '@swc/core': true
   esbuild: true
+minimumReleaseAgeExclude:
+  - '@nestjs/cli@12.0.15'
+  - '@nestjs/common@12.6.0'
+  - '@nestjs/core@12.6.0'
+  - '@nestjs/platform-express@12.6.0'
+  - '@nestjs/schematics@12.0.16'

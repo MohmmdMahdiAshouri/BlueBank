@@ -27,7 +27,7 @@ export const viteReactConfig = [
     },
     settings: {
       react: {
-        version: 'detect',
+        version: '19.3',
       },
     },
   },

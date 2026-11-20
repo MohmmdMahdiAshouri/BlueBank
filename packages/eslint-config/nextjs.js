@@ -25,7 +25,7 @@ export const nextjsConfig = [
     },
     settings: {
       react: {
-        version: 'detect',
+        version: '19.3',
       },
     },
   },

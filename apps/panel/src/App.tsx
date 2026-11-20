@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button, Card, CardHeader, CardTitle, CardContent, Badge, colors, spacing } from '@repo/ui';
 import type { BankAccount, HealthCheckData } from '@repo/contracts';
 import { env } from './env';
 
@@ -40,30 +39,52 @@ export default function App() {
   };
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: spacing.xl }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px' }}>
       <header
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: spacing.xl,
-          borderBottom: `1px solid ${colors.brand.border}`,
-          paddingBottom: spacing.md,
+          marginBottom: '32px',
+          borderBottom: '1px solid #E2E8F0',
+          paddingBottom: '16px',
         }}
       >
         <div>
-          <h1 style={{ margin: 0, color: colors.brand.primary, fontSize: '26px' }}>
+          <h1 style={{ margin: 0, color: '#0052FF', fontSize: '26px' }}>
             داشبورد مدیریت و نظارت BlueBank
           </h1>
-          <p style={{ margin: '4px 0 0', color: colors.brand.textSecondary, fontSize: '14px' }}>
-            پنل ادمین مبتنی بر Vite + React (پورت {env.VITE_PORT})
+          <p style={{ margin: '4px 0 0', color: '#64748B', fontSize: '14px' }}>
+            پنل ادمین مبتنی بر Vite 8 + React 19 (پورت {env.VITE_PORT})
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-          <Badge variant="success">Core Banking: متصل</Badge>
-          <Button size="sm" variant="outline" onClick={() => window.location.reload()}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span
+            style={{
+              padding: '4px 12px',
+              borderRadius: '9999px',
+              fontSize: '12px',
+              fontWeight: 600,
+              backgroundColor: '#ECFDF5',
+              color: '#10B981',
+            }}
+          >
+            Core Banking: متصل
+          </span>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              backgroundColor: 'transparent',
+              color: '#0F172A',
+              border: '1px solid #E2E8F0',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
             بروزرسانی داده‌ها
-          </Button>
+          </button>
         </div>
       </header>
 
@@ -71,93 +92,125 @@ export default function App() {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: spacing.lg,
-          marginBottom: spacing.xl,
+          gap: '24px',
+          marginBottom: '32px',
         }}
       >
-        <Card>
-          <CardHeader>
-            <CardTitle>وضعیت میکروسرویس Core-Banking</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div
-              style={{ display: 'flex', justifyContent: 'space-between', marginBottom: spacing.sm }}
-            >
-              <span>آدرس اتصال:</span>
-              <code>{env.VITE_API_URL}</code>
-            </div>
-            <div
-              style={{ display: 'flex', justifyContent: 'space-between', marginBottom: spacing.sm }}
-            >
-              <span>وضعیت سلامت سرویس:</span>
-              <Badge variant="success">{healthData.status.toUpperCase()}</Badge>
-            </div>
-            <div
-              style={{ display: 'flex', justifyContent: 'space-between', marginBottom: spacing.sm }}
-            >
-              <span>زمان فعال بودن (Uptime):</span>
-              <span>{healthData.uptime} ثانیه</span>
-            </div>
-          </CardContent>
-        </Card>
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '16px',
+            padding: '24px',
+            border: '1px solid #E2E8F0',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+          }}
+        >
+          <h3 style={{ margin: '0 0 16px', fontSize: '18px', color: '#0F172A' }}>
+            وضعیت میکروسرویس Core-Banking
+          </h3>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              color: '#64748B',
+            }}
+          >
+            <span>آدرس اتصال:</span>
+            <code>{env.VITE_API_URL}</code>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              color: '#64748B',
+            }}
+          >
+            <span>وضعیت سلامت سرویس:</span>
+            <span style={{ color: '#10B981', fontWeight: 600 }}>
+              {healthData.status.toUpperCase()}
+            </span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748B' }}>
+            <span>زمان فعال بودن (Uptime):</span>
+            <span>{healthData.uptime} ثانیه</span>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>مجموع سپرده‌های فعال</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div
-              style={{
-                fontSize: '26px',
-                fontWeight: 700,
-                color: colors.brand.primary,
-                marginBottom: spacing.xs,
-              }}
-            >
-              {(196000000).toLocaleString('fa-IR')} <span style={{ fontSize: '14px' }}>ریال</span>
-            </div>
-            <p style={{ margin: 0, fontSize: '13px' }}>تعداد کل حساب‌های تحت مدیریت: ۲ حساب</p>
-          </CardContent>
-        </Card>
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '16px',
+            padding: '24px',
+            border: '1px solid #E2E8F0',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+          }}
+        >
+          <h3 style={{ margin: '0 0 16px', fontSize: '18px', color: '#0F172A' }}>
+            مجموع سپرده‌های فعال
+          </h3>
+          <div style={{ fontSize: '26px', fontWeight: 700, color: '#0052FF', marginBottom: '4px' }}>
+            {(196000000).toLocaleString('fa-IR')} <span style={{ fontSize: '14px' }}>ریال</span>
+          </div>
+          <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>
+            تعداد کل حساب‌های تحت مدیریت: ۲ حساب
+          </p>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>لیست حساب‌های بانکی سیستم</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
-            <thead>
-              <tr style={{ borderBottom: `2px solid ${colors.brand.border}` }}>
-                <th style={{ padding: spacing.sm }}>شماره حساب</th>
-                <th style={{ padding: spacing.sm }}>نام صاحب حساب</th>
-                <th style={{ padding: spacing.sm }}>نوع حساب</th>
-                <th style={{ padding: spacing.sm }}>موجودی</th>
-                <th style={{ padding: spacing.sm }}>وضعیت</th>
+      <div
+        style={{
+          backgroundColor: '#FFFFFF',
+          borderRadius: '16px',
+          padding: '24px',
+          border: '1px solid #E2E8F0',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+        }}
+      >
+        <h3 style={{ margin: '0 0 16px', fontSize: '18px', color: '#0F172A' }}>
+          لیست حساب‌های بانکی سیستم
+        </h3>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid #E2E8F0' }}>
+              <th style={{ padding: '8px' }}>شماره حساب</th>
+              <th style={{ padding: '8px' }}>نام صاحب حساب</th>
+              <th style={{ padding: '8px' }}>نوع حساب</th>
+              <th style={{ padding: '8px' }}>موجودی</th>
+              <th style={{ padding: '8px' }}>وضعیت</th>
+            </tr>
+          </thead>
+          <tbody>
+            {accounts.map((acc) => (
+              <tr key={acc.id} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                <td style={{ padding: '8px' }}>
+                  <code>{acc.accountNumber}</code>
+                </td>
+                <td style={{ padding: '8px' }}>{acc.ownerName}</td>
+                <td style={{ padding: '8px' }}>{acc.type}</td>
+                <td style={{ padding: '8px' }}>
+                  {acc.balance.toLocaleString('fa-IR')} {acc.currency}
+                </td>
+                <td style={{ padding: '8px' }}>
+                  <span
+                    style={{
+                      padding: '2px 8px',
+                      borderRadius: '9999px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      backgroundColor: acc.isActive ? '#ECFDF5' : '#FEF2F2',
+                      color: acc.isActive ? '#10B981' : '#EF4444',
+                    }}
+                  >
+                    {acc.isActive ? 'فعال' : 'مسدود'}
+                  </span>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {accounts.map((acc) => (
-                <tr key={acc.id} style={{ borderBottom: `1px solid ${colors.brand.border}` }}>
-                  <td style={{ padding: spacing.sm }}>
-                    <code>{acc.accountNumber}</code>
-                  </td>
-                  <td style={{ padding: spacing.sm }}>{acc.ownerName}</td>
-                  <td style={{ padding: spacing.sm }}>{acc.type}</td>
-                  <td style={{ padding: spacing.sm }}>
-                    {acc.balance.toLocaleString('fa-IR')} {acc.currency}
-                  </td>
-                  <td style={{ padding: spacing.sm }}>
-                    <Badge variant={acc.isActive ? 'success' : 'error'}>
-                      {acc.isActive ? 'فعال' : 'مسدود'}
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

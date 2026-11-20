@@ -1,0 +1,30 @@
+# Agent Guidelines & Operating Rules
+
+## Core Rule: "One Prompt, One Review, One Commit" (1P-1R-1C)
+
+Every autonomous coding agent working in this repository must strictly adhere to the **One Prompt, One Review, One Commit** lifecycle for every user prompt or task execution.
+
+### 1. One Prompt (Atomic Scope & Planning)
+
+- **Deep Requirement Analysis**: Read the user prompt thoroughly. Inspect existing codebase conventions, `.agents` skills, and repository configuration before modifying any file.
+- **Strict Scope Boundaries**: Do not perform speculative refactoring, introduce unrequested packages, or expand scope beyond what was asked.
+- **Clear Execution Plan**: Formulate and follow a focused, deterministic implementation plan that maps directly to the user's intent.
+
+### 2. One Review (Rigorous Verification & Self-Correction)
+
+- **Zero-Tolerance Quality Gate**: Before marking any prompt or task as complete, you must execute the mandatory verification suite:
+  1. `pnpm install` (Lockfile & dependency consistency)
+  2. `pnpm typecheck` (Full strict TypeScript check with 0 type errors)
+  3. `pnpm lint` (ESLint flat config check with 0 errors and 0 warnings)
+  4. `pnpm build` (Production build verification for all packages and apps)
+- **Root-Cause Remediation**: If any error or warning arises, fix the root cause immediately and re-run all checks. Never suppress or bypass errors with `@ts-ignore`, `any`, or eslint-disable comments unless formally required and justified.
+- **Self-Review**: Inspect git diffs to ensure no unintended files, debug logs, or transient artifacts are staged.
+
+### 3. One Commit (Atomic Conventional Git Commit)
+
+- **Single Cohesive Commit**: Exactly one atomic git commit per completed prompt.
+- **Conventional Commits Standard**: The commit message must strictly comply with Conventional Commits specification:
+  - Format: `<type>(<scope>): <short summary>`
+  - Allowed types: `feat`, `fix`, `refactor`, `chore`, `docs`, `perf`, `test`
+  - Examples: `feat(client): upgrade to next 16 and streamline ui`, `fix(core-banking): resolve cors origin validation`
+- **Clean Working Tree**: Ensure pre-commit hooks (Husky, lint-staged, Commitlint) run cleanly and the working tree is completely clean upon task completion.
