@@ -1,0 +1,29 @@
+{
+  "name": "bluebank-monorepo",
+  "version": "0.0.1",
+  "private": true,
+  "packageManager": "pnpm@11.24.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:client": "turbo run dev --filter=@repo/client",
+    "dev:panel": "turbo run dev --filter=@repo/panel",
+    "dev:api": "turbo run dev --filter=@repo/core-banking",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,json,md}\"",
+    "clean": "turbo run clean && rm -rf node_modules .turbo",
+    "prepare": "husky || true"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.7.1",
+    "@commitlint/config-conventional": "^19.7.1",
+    "eslint": "^9.20.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3",
+    "prettier": "^3.5.3",
+    "turbo": "^2.4.4",
+    "typescript": "^5.8.2"
+  }
+}
