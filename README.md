@@ -54,4 +54,5 @@
 
 ## 🛡 قوانین ایجنت‌ها و کیفیت کد
 
-- مطابق با قانون مندرج در `AGENTS.md`، تمام فرآیندها مبتنی بر اصل **One Prompt, One Review, One Commit** کنترل می‌شوند.
+- مطابق با قانون مندرج در [AGENTS.md](file:///home/mohammad/Desktop/Programming/my-projects/BlueBank/AGENTS.md)، تمام فرآیندها مبتنی بر اصل **One Prompt, One Review, One Commit** کنترل می‌شوند.
+- سوابق و دلایل تصمیمات کلیدی معماری در [DECISIONS.md](file:///home/mohammad/Desktop/Programming/my-projects/BlueBank/DECISIONS.md) مستندسازی شده است.
