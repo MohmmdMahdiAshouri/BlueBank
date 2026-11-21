@@ -28,3 +28,13 @@ Every autonomous coding agent working in this repository must strictly adhere to
   - Allowed types: `feat`, `fix`, `refactor`, `chore`, `docs`, `perf`, `test`
   - Examples: `feat(client): upgrade to next 16 and streamline ui`, `fix(core-banking): resolve cors origin validation`
 - **Clean Working Tree**: Ensure pre-commit hooks (Husky, lint-staged, Commitlint) run cleanly and the working tree is completely clean upon task completion.
+
+---
+
+## Branching & Release Policy: Target Branch (`develop`)
+
+- **Primary Development Branch (`develop`)**: All development changes, feature additions, bug fixes, and commits pushed to GitHub must target the `develop` branch. Never push development or unverified work directly to `main`.
+- **Pristine Production Branch (`main`)**: The `main` branch is strictly reserved for stable, verified, production-ready releases that can be safely launched to production at any moment. It must remain launchable and clean at all times.
+- **Branch Management**:
+  - All day-to-day work, reviews, and prompt commits must be made and pushed on `develop`.
+  - While granular feature branch conventions may be evaluated in future architectural decisions, all current active integration and synchronization happen on `develop`.
