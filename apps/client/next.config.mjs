@@ -1,6 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  transpilePackages: ['@repo/contracts'],
-};
+const nextConfig = {};
 
 export default nextConfig;

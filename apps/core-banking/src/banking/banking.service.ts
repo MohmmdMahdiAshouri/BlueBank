@@ -7,7 +7,7 @@ import {
   TransferMoneySchema,
   CreateAccountSchema,
   ErrorCodes,
-} from '@repo/contracts';
+} from '../contracts';
 
 @Injectable()
 export class BankingService {

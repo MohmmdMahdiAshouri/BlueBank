@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import type { BankAccount, HealthCheckData } from '@repo/contracts';
+import type { BankAccount, HealthCheckData } from '../types';
 import { env } from '../env';
 
 export default function ClientHomePage() {

@@ -8,14 +8,10 @@
 
 ```text
 .
-├── apps/
-│   ├── client/           # فرانت‌اند کاربری - Next.js 16 (App Router) + TypeScript [Port: 3000]
-│   ├── panel/            # داشبورد مدیریت و مانیتورینگ - Vite 8 + React 19 + TypeScript [Port: 3001]
-│   └── core-banking/     # هسته پردازش بانکی - NestJS 12 + TypeScript (SWC) [Port: 4000]
-└── packages/
-    ├── contracts/        # قراردادهای DTO، اسکیماهای Zod 4 و ساختار ApiResponse/Error (CJS/ESM)
-    ├── typescript-config/# کانفیگ‌های اشتراکی TypeScript (base, nextjs, vite-react, nestjs)
-    └── eslint-config/    # کانفیگ اشتراکی ESLint Flat Config + Prettier
+└── apps/
+    ├── client/           # فرانت‌اند کاربری - Next.js 16 (App Router) + TypeScript [Port: 3000]
+    ├── panel/            # داشبورد مدیریت و مانیتورینگ - Vite 8 + React 19 + TypeScript [Port: 3001]
+    └── core-banking/     # هسته پردازش بانکی - NestJS 12 + Fastify + TypeScript (SWC) [Port: 4000]
 ```
 
 ---
@@ -27,8 +23,8 @@
 - **Next.js**: `v16.4.6`
 - **React**: `v19.3.1`
 - **Vite**: `v8.3.8`
-- **NestJS**: `v12.6.0`
-- **TypeScript**: `v7.0.2`
+- **NestJS**: `v12.6.0` (با آداپتور کارآمد **Fastify 5**)
+- **TypeScript**: `v6.0.3`
 - **Turborepo**: `v2.11.13`
 - **Zod**: `v4.6.7`
 - **ESLint**: `v10.15.0`

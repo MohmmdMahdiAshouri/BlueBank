@@ -11,24 +11,26 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@fastify/cors": "^11.4.3",
     "@nestjs/common": "^12.6.0",
     "@nestjs/core": "^12.6.0",
-    "@nestjs/platform-express": "^12.6.0",
-    "@repo/contracts": "workspace:*",
+    "@nestjs/platform-fastify": "^12.6.0",
+    "fastify": "^5.12.8",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@nestjs/cli": "^12.0.15",
     "@nestjs/schematics": "^12.0.16",
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
     "@swc/cli": "^0.8.2",
     "@swc/core": "^1.16.22",
-    "@types/express": "^5.0.6",
     "@types/node": "^26.6.6",
     "eslint": "^10.15.0",
-    "typescript": "^6.0.3"
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.14.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.73.0"
   }
 }

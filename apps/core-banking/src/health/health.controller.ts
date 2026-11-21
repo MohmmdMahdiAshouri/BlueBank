@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiResponse, createSuccessResponse, HealthCheckData } from '@repo/contracts';
+import { ApiResponse, createSuccessResponse, HealthCheckData } from '../contracts';
 
 @Controller('health')
 export class HealthController {

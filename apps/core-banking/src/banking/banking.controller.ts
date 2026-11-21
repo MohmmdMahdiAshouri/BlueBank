@@ -7,7 +7,7 @@ import {
   Transaction,
   TransferMoneyDto,
   CreateAccountDto,
-} from '@repo/contracts';
+} from '../contracts';
 
 @Controller('banking')
 export class BankingController {
