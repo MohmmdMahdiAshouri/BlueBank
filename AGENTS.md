@@ -9,6 +9,7 @@ Every autonomous coding agent working in this repository must strictly adhere to
 - **Deep Requirement Analysis**: Read the user prompt thoroughly. Inspect existing codebase conventions, `.agents` skills, and repository configuration before modifying any file.
 - **Strict Scope Boundaries**: Do not perform speculative refactoring, introduce unrequested packages, or expand scope beyond what was asked.
 - **Clear Execution Plan**: Formulate and follow a focused, deterministic implementation plan that maps directly to the user's intent.
+- **ADR Assessment & Proposal**: Evaluate whether the task introduces significant architectural changes, framework migrations, or structural shifts. If an ADR is warranted, formulate and propose the draft to the user for review first. Never modify `DECISIONS.md` directly without explicit user approval.
 
 ### 2. One Review (Rigorous Verification & Self-Correction)
 
@@ -28,6 +29,21 @@ Every autonomous coding agent working in this repository must strictly adhere to
   - Allowed types: `feat`, `fix`, `refactor`, `chore`, `docs`, `perf`, `test`
   - Examples: `feat(client): upgrade to next 16 and streamline ui`, `fix(core-banking): resolve cors origin validation`
 - **Clean Working Tree**: Ensure pre-commit hooks (Husky, lint-staged, Commitlint) run cleanly and the working tree is completely clean upon task completion.
+
+---
+
+## Architecture Decision Records (ADR) Policy & Workflow
+
+For any task that introduces architectural changes, core framework/library migrations, monorepo structural alterations, or runtime/protocol decisions:
+
+1. **Assess Need**:
+   - Evaluate whether the task warrants an ADR (e.g., changes to frameworks, adapters, monorepo organization, storage/database choices, API protocols).
+2. **Propose Draft First (Mandatory User Review Gate)**:
+   - **Never write directly to `DECISIONS.md`.**
+   - The agent must formulate a complete ADR draft in the chat response (following the standard structure: Context & Problem Statement, Decision & Solution, Consequences & Costs/Trade-offs, Status, Stakeholders) and present it explicitly for user review.
+3. **Persist to `DECISIONS.md` Only Upon Explicit Approval**:
+   - Only after the user explicitly reviews and confirms the proposal (e.g., "approved", "تایید است", "ثبت کن"), append the finalized ADR to `DECISIONS.md`.
+   - If the user requests modifications, adjust the proposal in chat and wait for final confirmation before writing to `DECISIONS.md`.
 
 ---
 
