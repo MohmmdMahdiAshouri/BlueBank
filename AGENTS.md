@@ -1,34 +1,59 @@
 # Agent Guidelines & Operating Rules
 
-## Core Rule: "One Prompt, One Review, One Commit" (1P-1R-1C)
+## Core Rule: "Prompt Execution, Verification, and User-Approved Commit" (No Auto-Commit Policy)
 
-Every autonomous coding agent working in this repository must strictly adhere to the **One Prompt, One Review, One Commit** lifecycle for every user prompt or task execution.
+Every autonomous coding agent working in this repository must strictly adhere to the following lifecycle for every user prompt or task execution:
 
-### 1. One Prompt (Atomic Scope & Planning)
+### 1. Atomic Scope & Planning
 
 - **Deep Requirement Analysis**: Read the user prompt thoroughly. Inspect existing codebase conventions, `.agents` skills, and repository configuration before modifying any file.
 - **Strict Scope Boundaries**: Do not perform speculative refactoring, introduce unrequested packages, or expand scope beyond what was asked.
 - **Clear Execution Plan**: Formulate and follow a focused, deterministic implementation plan that maps directly to the user's intent.
 - **ADR Assessment & Proposal**: Evaluate whether the task introduces significant architectural changes, framework migrations, or structural shifts. If an ADR is warranted, formulate and propose the draft to the user for review first. Never modify `DECISIONS.md` directly without explicit user approval.
 
-### 2. One Review (Rigorous Verification & Self-Correction)
+### 2. Rigorous Verification & Self-Correction (Quality Gate)
 
-- **Zero-Tolerance Quality Gate**: Before marking any prompt or task as complete, you must execute the mandatory verification suite:
+- **Zero-Tolerance Quality Gate**: Before presenting the output to the user, you must execute the mandatory verification suite:
   1. `pnpm install` (Lockfile & dependency consistency)
   2. `pnpm typecheck` (Full strict TypeScript check with 0 type errors)
   3. `pnpm lint` (ESLint flat config check with 0 errors and 0 warnings)
-  4. `pnpm build` (Production build verification for all packages and apps)
+  4. `pnpm test` (Unit and integration tests with 0 failures)
+  5. `pnpm build` (Production build verification for all packages and apps)
+  6. **Runtime Smoke Test (اجرا و راه‌اندازی واقعی برنامه)**: Start/run the application to verify that it boots cleanly without runtime errors, crash on startup, missing dependencies, or unhandled exceptions.
+- **Mandatory Runtime Execution & Smoke Test**:
+  - Compiling and building alone are not sufficient. After every task that modifies application code or configurations, the agent MUST run the affected application (e.g., `pnpm start`, `pnpm dev:api`, or `node dist/main`) to verify live execution and ensure no runtime errors (e.g. `MODULE_NOT_FOUND`, DI resolution failure, port conflict).
+  - Perform a sanity check (such as requesting the `/health` endpoint or validating startup logs) and terminate the test process cleanly before presenting results.
 - **Root-Cause Remediation**: If any error or warning arises, fix the root cause immediately and re-run all checks. Never suppress or bypass errors with `@ts-ignore`, `any`, or eslint-disable comments unless formally required and justified.
-- **Self-Review**: Inspect git diffs to ensure no unintended files, debug logs, or transient artifacts are staged.
+- **Self-Review**: Inspect git diffs to ensure no unintended files, debug logs, or transient artifacts are staged or left behind.
 
-### 3. One Commit (Atomic Conventional Git Commit)
+### 3. Mandatory User Review Gate Before Commit (Strict No Auto-Commit Rule)
 
-- **Single Cohesive Commit**: Exactly one atomic git commit per completed prompt.
-- **Conventional Commits Standard**: The commit message must strictly comply with Conventional Commits specification:
+- **NEVER Commit Automatically**: When a prompt is executed and the output is generated, the agent must **NEVER** commit automatically.
+- **Wait for User Review**: Present the results, summarize changes, and wait for the user to review the code and output.
+- **Explicit User Authorization Required**: A git commit can ONLY be created after the user explicitly reviews the changes and gives permission to commit (e.g., "commit", "کامیت کن", "تایید است، کامیت کن", "you have permission to commit").
+- **Single Cohesive Commit**: Exactly one atomic git commit per authorized prompt.
+- **Conventional Commits Standard**: When authorized to commit, the commit message must strictly comply with Conventional Commits specification:
   - Format: `<type>(<scope>): <short summary>`
   - Allowed types: `feat`, `fix`, `refactor`, `chore`, `docs`, `perf`, `test`
   - Examples: `feat(client): upgrade to next 16 and streamline ui`, `fix(core-banking): resolve cors origin validation`
-- **Clean Working Tree**: Ensure pre-commit hooks (Husky, lint-staged, Commitlint) run cleanly and the working tree is completely clean upon task completion.
+- **Clean Working Tree**: After receiving authorization and committing, ensure pre-commit hooks (Husky, lint-staged, Commitlint) run cleanly and the working tree is completely clean.
+
+---
+
+## Testing Standards & AAA Pattern Rule
+
+All tests (unit tests, integration tests, spec files such as `*.spec.ts` or `*.test.ts`) written across all applications and packages in this repository must strictly adhere to the **AAA (Arrange, Act, Assert)** pattern:
+
+1. **Arrange (تنظیم و آماده‌سازی)**:
+   - Set up the environment, instantiate the subject under test (controllers, services, utilities), configure test modules/dependencies, and prepare input fixtures or mocks.
+2. **Act (اجرا و عملکرد)**:
+   - Trigger the specific action, invoke the method, or perform the operation being tested. Keep this phase concise and focused on the single behavior under test.
+3. **Assert (اعتبارسنجی و بررسی صحت)**:
+   - Verify that the outcome matches expectations (returned value, state mutation, thrown exception, or side effect) using clear and precise assertions.
+
+- **Structure & Clarity**:
+  - Explicitly organize test bodies into these three distinct phases, clearly delineated or labeled with comments (`// Arrange`, `// Act`, `// Assert`) to ensure immediate readability and diagnostic clarity.
+  - Avoid mixing execution and assertions into a single monolithic step.
 
 ---
 

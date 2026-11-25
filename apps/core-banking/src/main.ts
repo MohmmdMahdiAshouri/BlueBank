@@ -10,6 +10,8 @@ async function bootstrap() {
     new FastifyAdapter({ logger: false }),
   );
 
+  app.enableShutdownHooks();
+
   await app.register(import('@fastify/cors'), {
     origin: [env.CLIENT_URL, env.PANEL_URL],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
