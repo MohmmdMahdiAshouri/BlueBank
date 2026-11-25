@@ -57,6 +57,17 @@ All tests (unit tests, integration tests, spec files such as `*.spec.ts` or `*.t
 
 ---
 
+## Environment Variables & Configuration Policy (No Direct `process.env` Access)
+
+- **No `process.env` Outside Schema Modules**: Direct access to `process.env` is strictly prohibited everywhere outside the designated environment validation schema/config modules (e.g., forbidden in controllers, services, modules, `main.ts`, feature code, and tests).
+- **Single Validated Source of Truth**:
+  - All environment variables must be declared and validated with **Zod** inside the application's environment configuration module (`apps/core-banking/src/config/env.config.ts` for backend, `apps/client/src/env.ts` for client).
+  - In NestJS applications (`apps/core-banking`), configuration must be registered globally via `@nestjs/config` (`AppConfigModule`) and accessed strictly through typed dependency injection (`AppConfigService` or `ConfigService<Env, true>`).
+- **Fail-Fast Startup Validation**: Invalid or missing required environment variables must prevent the application from starting and output a clear, readable list of every failing variable.
+- **Example Files & Git Safety**: Every variable defined in the Zod schema must be documented in the app's `.env.example` file, and real `.env` files must remain gitignored.
+
+---
+
 ## Architecture Decision Records (ADR) Policy & Workflow
 
 For any task that introduces architectural changes, core framework/library migrations, monorepo structural alterations, or runtime/protocol decisions:
