@@ -53,6 +53,18 @@ const corsOriginsSchema = z
     return origins;
   });
 
+export const logLevelSchema = z.enum([
+  'fatal',
+  'error',
+  'warn',
+  'info',
+  'debug',
+  'trace',
+  'silent',
+]);
+
+export type LogLevel = z.infer<typeof logLevelSchema>;
+
 export const envSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'production']).default('development'),
@@ -67,6 +79,7 @@ export const envSchema = z
       .int()
       .min(1)
       .default(1024 * 1024),
+    LOG_LEVEL: logLevelSchema.optional(),
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV === 'production' && data.CORS_ORIGINS.length === 0) {
@@ -77,14 +90,14 @@ export const envSchema = z
           'CORS_ORIGINS is required in production and must include at least one allowed origin',
       });
     }
-  });
+  })
+  .transform((data) => ({
+    ...data,
+    LOG_LEVEL: data.LOG_LEVEL ?? (data.NODE_ENV === 'development' ? 'debug' : 'info'),
+  }));
 
 export type Env = z.infer<typeof envSchema>;
 
-/**
- * Resolves `.env*` file paths in precedence order (highest priority first)
- * across the application root and current working directory.
- */
 export function getEnvFilePaths(
   nodeEnv: string = process.env.NODE_ENV || 'development',
   cwd: string = process.cwd(),

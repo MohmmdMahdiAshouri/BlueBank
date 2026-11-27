@@ -18,13 +18,18 @@ interface CapturedReply {
   body: ApiErrorResponse;
 }
 
-function createFilterHarness(requestOverrides: { url?: string } = {}) {
+function createFilterHarness(
+  requestOverrides: { id?: string; headers?: Record<string, string>; url?: string } = {},
+) {
   let capturedReply: CapturedReply | undefined;
+  const rawResponse: { err?: Error } = {};
   const request = {
+    id: 'req-test-123',
+    headers: {},
     url: '/api/v1/test',
     ...requestOverrides,
   };
-  const response = {};
+  const response = { raw: rawResponse };
 
   const httpAdapter = {
     getRequestUrl: () => request.url,
@@ -47,6 +52,7 @@ function createFilterHarness(requestOverrides: { url?: string } = {}) {
   return {
     filter,
     host,
+    rawResponse,
     getCapturedReply: () => capturedReply,
   };
 }
@@ -55,6 +61,7 @@ describe('GlobalExceptionFilter', () => {
   it('formats ZodError into 400 VALIDATION_FAILED with path/message details', () => {
     // Arrange
     const { filter, host, getCapturedReply } = createFilterHarness({
+      id: 'req-zod-1',
       url: '/api/v1/accounts',
     });
     const parsed = z
@@ -80,12 +87,13 @@ describe('GlobalExceptionFilter', () => {
       { path: 'amount', message: parsed.error.issues[1].message },
     ]);
     assert.equal(reply.body.path, '/api/v1/accounts');
+    assert.equal(reply.body.requestId, 'req-zod-1');
     assert.ok(!Number.isNaN(Date.parse(reply.body.timestamp)));
   });
 
   it('preserves AppException status, code, message, and optional details', () => {
     // Arrange
-    const { filter, host, getCapturedReply } = createFilterHarness();
+    const { filter, host, getCapturedReply } = createFilterHarness({ id: 'req-app-1' });
     const exception = new AppException(
       'INSUFFICIENT_FUNDS',
       HttpStatus.UNPROCESSABLE_ENTITY,
@@ -104,11 +112,12 @@ describe('GlobalExceptionFilter', () => {
     assert.equal(reply.body.error, 'INSUFFICIENT_FUNDS');
     assert.equal(reply.body.message, 'Account balance is too low');
     assert.deepEqual(reply.body.details, { available: 50 });
+    assert.equal(reply.body.requestId, 'req-app-1');
   });
 
   it('maps Nest HttpException status and derives error from its class name', () => {
     // Arrange
-    const { filter, host, getCapturedReply } = createFilterHarness();
+    const { filter, host, getCapturedReply } = createFilterHarness({ id: 'req-http-1' });
     const forbidden = new ForbiddenException('Access denied');
     const badRequestWithArray = new BadRequestException(['first issue', 'second issue']);
     const baseHttp = new HttpException('Teapot error', HttpStatus.I_AM_A_TEAPOT);
@@ -138,7 +147,8 @@ describe('GlobalExceptionFilter', () => {
 
   it('logs the real error and returns a generic 500 INTERNAL_ERROR without leaking details', (t) => {
     // Arrange
-    const { filter, host, getCapturedReply } = createFilterHarness({
+    const { filter, host, rawResponse, getCapturedReply } = createFilterHarness({
+      id: 'req-err-1',
       url: '/api/v1/boom',
     });
     const errorLogMock = mock.method(Logger.prototype, 'error', () => undefined);
@@ -157,10 +167,15 @@ describe('GlobalExceptionFilter', () => {
     assert.equal(reply.body.message, 'Internal server error');
     assert.equal('details' in reply.body, false);
     assert.equal(reply.body.path, '/api/v1/boom');
+    assert.equal(reply.body.requestId, 'req-err-1');
     assert.equal(JSON.stringify(reply.body).includes('supersecret'), false);
     assert.equal(JSON.stringify(reply.body).includes('global-exception.filter'), false);
+    assert.equal(rawResponse.err, secretError);
     assert.equal(errorLogMock.mock.callCount(), 1);
-    assert.match(String(errorLogMock.mock.calls[0].arguments[0]), /supersecret/);
-    assert.equal(errorLogMock.mock.calls[0].arguments[1], secretError.stack);
+    assert.deepEqual(errorLogMock.mock.calls[0].arguments[0], {
+      err: secretError,
+      path: '/api/v1/boom',
+      requestId: 'req-err-1',
+    });
   });
 });

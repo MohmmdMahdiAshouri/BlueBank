@@ -10,6 +10,7 @@ import { HttpAdapterHost } from '@nestjs/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ZodError } from 'zod';
 import { AppException } from '../exceptions/app.exception';
+import { resolveRequestId } from '../../logging/request-id';
 
 export interface ValidationErrorDetail {
   path: string;
@@ -23,6 +24,7 @@ export interface ApiErrorResponse {
   details?: unknown;
   path: string;
   timestamp: string;
+  requestId: string;
 }
 
 function formatHttpExceptionError(name: string): string {
@@ -92,8 +94,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     const path = httpAdapter.getRequestUrl(request);
     const timestamp = new Date().toISOString();
+    const requestId = request.id || resolveRequestId(request.headers?.['x-request-id']);
 
-    const { statusCode, body } = this.buildErrorResponse(exception, path, timestamp);
+    const { statusCode, body } = this.buildErrorResponse(
+      exception,
+      response,
+      path,
+      timestamp,
+      requestId,
+    );
 
     if (!httpAdapter.isHeadersSent(response)) {
       httpAdapter.reply(response, body, statusCode);
@@ -104,8 +113,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
   private buildErrorResponse(
     exception: unknown,
+    response: FastifyReply,
     path: string,
     timestamp: string,
+    requestId: string,
   ): { statusCode: number; body: ApiErrorResponse } {
     if (exception instanceof ZodError) {
       const details: ValidationErrorDetail[] = exception.issues.map((issue) => ({
@@ -122,6 +133,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           details,
           path,
           timestamp,
+          requestId,
         },
       };
     }
@@ -138,6 +150,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           ...(exception.details !== undefined ? { details: exception.details } : {}),
           path,
           timestamp,
+          requestId,
         },
       };
     }
@@ -155,14 +168,19 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           ...(details !== undefined ? { details } : {}),
           path,
           timestamp,
+          requestId,
         },
       };
     }
 
-    this.logger.error(
-      `Unhandled exception on ${path}: ${exception instanceof Error ? exception.message : String(exception)}`,
-      exception instanceof Error ? exception.stack : undefined,
-    );
+    this.logger.error({ err: exception, path, requestId }, 'Unhandled exception');
+
+    if (response?.raw) {
+      response.raw.err =
+        exception instanceof Error
+          ? exception
+          : new Error(typeof exception === 'string' ? exception : 'Unhandled non-error exception');
+    }
 
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -172,6 +190,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         message: 'Internal server error',
         path,
         timestamp,
+        requestId,
       },
     };
   }

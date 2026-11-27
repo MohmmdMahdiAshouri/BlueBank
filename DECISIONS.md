@@ -154,7 +154,7 @@
 2. **کلاس پایه خطاهای دامنه (`AppException`)**:
    - تعریف `AppException` به عنوان کلاس پایه با ویژگی‌های `code` ماشین‌خوان، `statusCode`، `message` و `details` اختیاری برای مدل‌سازی خطاهای منطقی و بانکی.
 3. **فیلتر سراسری یکپارچه‌سازی خطاها (`GlobalExceptionFilter`)**:
-   - ثبت `GlobalExceptionFilter` از طریق `APP_FILTER` در `AppModule` که تمام استثناها را به قالب واحد `{ statusCode, error, message, details?, path, timestamp }` نگاشت می‌کند:
+   - ثبت `GlobalExceptionFilter` از طریق `APP_FILTER` در `AppModule` که تمام استثناها را به قالب واحد `{ statusCode, error, message, details?, path, timestamp, requestId }` نگاشت می‌کند:
      - `ZodError` ← وضعیت `400`، کد `VALIDATION_FAILED` و آرایه `details` شامل `{ path, message }`
      - `AppException` ← وضعیت، `code`، `message` و `details` اختصاصی خود استثنا
      - `HttpException` نست ← وضعیت خود استثنا و کد `error` استخراج‌شده از `exception.name` (مانند `NOT_FOUND`، `FORBIDDEN`)
@@ -166,7 +166,7 @@
 
 #### دستاوردهای مثبت (Positive Impacts):
 
-- **قرارداد واحد و قابل پیش‌بینی برای فرانت‌اند**: کلاینت‌های Next.js و Vite همیشه یک ساختار JSON ثابت همراه با کد خطای ماشین‌خوان دریافت می‌کنند.
+- **قرارداد واحد و قابل پیش‌بینی برای فرانت‌اند**: کلاینت‌های Next.js و Vite همیشه یک ساختار JSON ثابت همراه با کد خطای ماشین‌خوان و `requestId` برای پیگیری دریافت می‌کنند.
 - **ایمنی و عدم نشت جزئیات داخلی**: خطاهای پیش‌بینی‌نشده سرور هرگز پیام داخلی یا `stack trace` را در پاسخ HTTP افشا نمی‌کنند.
 - **هم‌راستایی کامل با Zod**: اعتبارسنجی و تبدیل تایپ ورودی‌ها مستقیماً با اسکیماهای `zod` بدون تکرار قوانین در دکوراتورهای جداگانه انجام می‌شود.
 
@@ -174,3 +174,52 @@
 
 - **الزام به استفاده از `ZodValidationPipe` در اندپوینت‌ها**: پارامترهای `@Body(...)` یا سایر ورودی‌ها باید صراحتاً به `ZodValidationPipe` متصل شوند و به صورت ضمنی بر اساس کلاس DTO اعتبارسنجی نمی‌شوند.
 - **نیاز به استخراج یکنواخت کد خطا از نام کلاس در `HttpException`**: نام کلاس‌های سفارشی مشتق از `HttpException` باید از الگوی نام‌گذاری استاندارد PascalCase پیروی کنند تا کد `UPPER_SNAKE_CASE` معنادار تولید شود.
+
+---
+
+## ADR 0005: لاگینگ ساختاریافته یکپارچه با `nestjs-pino` و همبستگی درخواست‌ها با `x-request-id`
+
+- **وضعیت**: پذیرفته‌شده (Accepted)
+- **تاریخ**: ۲۰۲۶-۱۱-۲۷
+- **ذینفعان**: تیم بک‌اند، مهندسی زیرساخت و Observability، امنیت
+
+---
+
+### ۱. مسئله و دلیل (Context & Problem Statement)
+
+پس از انتخاب Fastify به عنوان آداپتور HTTP در `core-banking`، نگه داشتن `ConsoleLogger` پیش‌فرض NestJS یا فعال‌سازی مستقل لاگر Fastify باعث بروز مشکلات زیر می‌شد:
+
+1. **دوگانگی لاگرها (Split Logging)**: لاگ‌های چرخه حیات NestJS و سرویس‌ها با فرمت متنی `ConsoleLogger` چاپ می‌شدند و لاگ‌های HTTP Fastify به صورت مستقل یا با فرمت متفاوت تولید می‌شدند، بدون اشتراک‌گذاری جریان و زمینه درخواست.
+2. **نبود شناسه همبستگی درخواست (Request Correlation)**: بدون شناسه درخواست یکتا در لاگ‌ها، پاسخ‌ها و پیام‌های خطا، ردیابی زنجیره اجرای یک درخواست در سرویس‌های بانکی دشوار بود.
+3. **خطر افشای اطلاعات حساس در لاگ HTTP**: ثبت خام هدرهای درخواست می‌تواند توکن‌های `authorization` و کوکی‌های نشست (`cookie`) را در خروجی لاگ‌ها ذخیره کند.
+
+---
+
+### ۲. تصمیم و راهکار (Decision & Solution)
+
+تصمیم گرفته شد لاگینگ ساختاریافته `apps/core-banking` بر پایه **`nestjs-pino`** (`pino` و `pino-http`) به صورت متمرکز طراحی شود:
+
+1. **یکپارچه‌سازی لاگر Nest و لاگ‌های درخواست HTTP**:
+   - لاگر داخلی Fastify در `FastifyAdapter` غیرفعال شده (`logger: false`) و `LoggerModule.forRootAsync` در `AppModule` به همراه `app.useLogger(app.get(Logger))` (با `bufferLogs: true`) به عنوان تنها مالک لاگر Pino تنظیم می‌شود تا لاگ‌های NestJS و درخواست‌های HTTP از یک نمونه Pino واحد و کانتکست `AsyncLocalStorage` عبور کنند.
+2. **مدیریت امن و همبستگی `x-request-id`**:
+   - تابع `resolveRequestId` هدر ورودی `x-request-id` را تنها در صورت داشتن حداکثر ۶۴ کاراکتر مجاز (`/^[A-Za-z0-9._-]{1,64}$/`) می‌پذیرد و در غیر این صورت UUID جدید تولید می‌کند.
+   - شناسه درخواست در `genReqId` آداپتور Fastify ثبت شده، از طریق هوک‌های پاسخ در هدر `x-request-id` بازگردانده می‌شود، و در فیلد `requestId` بدنه تمام خطاهای `GlobalExceptionFilter` و رکورد `req.id` لاگ‌های Pino درج می‌گردد.
+3. **پیکربندی محیط‌محور (`LOG_LEVEL` و فرمت خروجی) و Redaction**:
+   - متغیر `LOG_LEVEL` به اسکیمای Zod در `env.config.ts` اضافه شده و به صورت پیش‌فرض در `development` برابر `debug` و در سایر محیط‌ها `info` است.
+   - خروجی خوانا (`pino-pretty`) فقط در محیط `development` فعال می‌شود و در سایر محیط‌ها (از جمله `production`) خروجی JSON استاندارد تولید می‌شود.
+   - مسیرهای `req.headers.authorization`، `req.headers.cookie`، `headers.authorization` و `headers.cookie` با مقدار `[REDACTED]` در پیکربندی Pino پوشانده می‌شوند.
+
+---
+
+### ۳. هزینه‌ها و پیامدها (Consequences & Costs)
+
+#### دستاوردهای مثبت (Positive Impacts):
+
+- **ردیابی سرتاسری یک درخواست (End-to-End Traceability)**: تمام لاگ‌های تولیدشده در کنترلرها، سرویس‌ها، `GlobalExceptionFilter` و رکورد پایان درخواست HTTP دارای `req.id` مشترک و منطبق با هدر `x-request-id` و فیلد `requestId` پاسخ خطا هستند.
+- **عملکرد بالا و سازگاری با ابزارهای جمع‌آوری لاگ**: خروجی JSON ساختاریافته در تولید بدون سربار بالا برای Log Aggregatorها آماده است و در محیط توسعه خوانایی مناسبی دارد.
+- **کاهش ریسک امنیتی و جلوگیری از Log Injection**: اعتبارسنجی کاراکترها و طول `x-request-id` و Redact خودکار هدرهای احراز هویت از نشت توکن‌ها و تزریق در لاگ جلوگیری می‌کند.
+
+#### هزینه‌ها و سبک‌سنگین‌ها (Costs & Trade-offs):
+
+- **افزوده شدن وابستگی‌های `nestjs-pino`، `pino`، `pino-http` و `pino-pretty`** به `apps/core-banking`.
+- **تکیه بر میدل‌ویر `pino-http` در NestJS برای لاگ خودکار درخواست‌ها**: در صورت نیاز آینده به ثبت خودکار روت‌های خارج از محدوده پوشش پیش‌فرض میدل‌ویر NestJS یا استفاده از `request.log` مستقیم Fastify در هوک‌های سطح پایین، باید الگوی `useExisting` یا هوک‌های سطح Fastify ارزیابی شود.

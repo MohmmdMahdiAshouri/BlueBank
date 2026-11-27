@@ -52,6 +52,7 @@ describe('env configuration', () => {
       CORS_ORIGINS: [],
       TRUST_PROXY: false,
       BODY_LIMIT: 1024 * 1024,
+      LOG_LEVEL: 'debug',
     });
     assert.equal(typeof parsed.PORT, 'number');
     assert.equal(typeof parsed.TRUST_PROXY, 'boolean');
@@ -84,7 +85,35 @@ describe('env configuration', () => {
       CORS_ORIGINS: ['https://app.bluebank.local', 'https://panel.bluebank.local'],
       TRUST_PROXY: true,
       BODY_LIMIT: 2097152,
+      LOG_LEVEL: 'info',
     });
+  });
+
+  it('uses explicit LOG_LEVEL when provided and rejects invalid LOG_LEVEL values', () => {
+    // Arrange
+    const validDevOverride = { NODE_ENV: 'development', LOG_LEVEL: 'warn' };
+    const validProdOverride = {
+      NODE_ENV: 'production',
+      CORS_ORIGINS: 'https://app.bluebank.local',
+      LOG_LEVEL: 'debug',
+    };
+    const invalidLogLevel = { LOG_LEVEL: 'verbose' };
+    let caughtError: unknown;
+
+    // Act
+    const devParsed = validateEnv(validDevOverride);
+    const prodParsed = validateEnv(validProdOverride);
+    try {
+      validateEnv(invalidLogLevel);
+    } catch (error) {
+      caughtError = error;
+    }
+
+    // Assert
+    assert.equal(devParsed.LOG_LEVEL, 'warn');
+    assert.equal(prodParsed.LOG_LEVEL, 'debug');
+    assert.ok(caughtError instanceof Error);
+    assert.match(caughtError.message, /- LOG_LEVEL:/);
   });
 
   it('parses string "false" for TRUST_PROXY as boolean false', () => {
