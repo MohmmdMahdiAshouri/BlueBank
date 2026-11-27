@@ -1,10 +1,13 @@
 import 'reflect-metadata';
-import { RequestMethod, VersioningType } from '@nestjs/common';
+import type { IncomingMessage } from 'node:http';
+import { Logger, RequestMethod, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { Logger as PinoNestLogger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { AppConfigModule } from './config/app-config.module';
 import { AppConfigService } from './config/app-config.service';
+import { resolveRequestId } from './logging/request-id';
 
 async function bootstrap() {
   const configContext = await NestFactory.createApplicationContext(AppConfigModule, {
@@ -15,17 +18,32 @@ async function bootstrap() {
   const bodyLimit = bootstrapConfig.get('BODY_LIMIT');
   await configContext.close();
 
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter({
-      logger: false,
-      // Decides what `request.ip` is by controlling whether Fastify trusts X-Forwarded-* proxy headers.
-      trustProxy,
-      bodyLimit,
-    }),
-  );
+  const fastifyAdapter = new FastifyAdapter({
+    logger: false,
+    requestIdHeader: false,
+    genReqId: (req: IncomingMessage) => resolveRequestId(req.headers['x-request-id']),
+    trustProxy,
+    bodyLimit,
+  });
+
+  const fastify = fastifyAdapter.getInstance();
+  fastify.addHook('onRequest', (request, reply, done) => {
+    reply.header('x-request-id', request.id);
+    done();
+  });
+  fastify.addHook('onSend', (request, reply, _payload, done) => {
+    if (!reply.hasHeader('x-request-id')) {
+      reply.header('x-request-id', request.id);
+    }
+    done();
+  });
+
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, fastifyAdapter, {
+    bufferLogs: true,
+  });
 
   app.enableShutdownHooks();
+  app.useLogger(app.get(PinoNestLogger));
 
   app.setGlobalPrefix('api', {
     exclude: [{ path: 'health', method: RequestMethod.GET }],
@@ -48,7 +66,9 @@ async function bootstrap() {
   const port = config.get('PORT');
 
   await app.listen({ port, host });
-  console.log(`🚀 BlueBank Core-Banking service (Fastify) running on: http://${host}:${port}`);
+  new Logger('Bootstrap').log(
+    `BlueBank Core-Banking service (Fastify) running on: http://${host}:${port}`,
+  );
 }
 
 void bootstrap();
