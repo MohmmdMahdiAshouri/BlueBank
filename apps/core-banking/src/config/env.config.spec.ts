@@ -49,11 +49,16 @@ describe('env configuration', () => {
       PORT: 4000,
       CLIENT_URL: 'http://localhost:3000',
       PANEL_URL: 'http://localhost:3001',
+      CORS_ORIGINS: [],
+      TRUST_PROXY: false,
+      BODY_LIMIT: 1024 * 1024,
     });
     assert.equal(typeof parsed.PORT, 'number');
+    assert.equal(typeof parsed.TRUST_PROXY, 'boolean');
+    assert.equal(typeof parsed.BODY_LIMIT, 'number');
   });
 
-  it('coerces PORT to a number and trims HOST when valid values are provided', () => {
+  it('coerces PORT, BODY_LIMIT, parses CORS_ORIGINS list, and parses TRUST_PROXY when valid values are provided', () => {
     // Arrange
     const rawEnv = {
       NODE_ENV: 'production',
@@ -61,6 +66,9 @@ describe('env configuration', () => {
       PORT: '8080',
       CLIENT_URL: 'https://app.bluebank.local',
       PANEL_URL: 'https://panel.bluebank.local',
+      CORS_ORIGINS: 'https://app.bluebank.local, https://panel.bluebank.local',
+      TRUST_PROXY: 'true',
+      BODY_LIMIT: '2097152',
     };
 
     // Act
@@ -73,7 +81,69 @@ describe('env configuration', () => {
       PORT: 8080,
       CLIENT_URL: 'https://app.bluebank.local',
       PANEL_URL: 'https://panel.bluebank.local',
+      CORS_ORIGINS: ['https://app.bluebank.local', 'https://panel.bluebank.local'],
+      TRUST_PROXY: true,
+      BODY_LIMIT: 2097152,
     });
+  });
+
+  it('parses string "false" for TRUST_PROXY as boolean false', () => {
+    // Arrange
+    const rawEnv = { TRUST_PROXY: 'false' };
+
+    // Act
+    const parsed = validateEnv(rawEnv);
+
+    // Assert
+    assert.equal(parsed.TRUST_PROXY, false);
+  });
+
+  it('fails when CORS_ORIGINS is empty in production or contains invalid URLs', () => {
+    // Arrange
+    const emptyProdEnv = { NODE_ENV: 'production', CORS_ORIGINS: '' };
+    const invalidOriginEnv = {
+      NODE_ENV: 'development',
+      CORS_ORIGINS: 'http://localhost:3000, not-a-url',
+    };
+    let emptyProdError: unknown;
+    let invalidOriginError: unknown;
+
+    // Act
+    try {
+      validateEnv(emptyProdEnv);
+    } catch (error) {
+      emptyProdError = error;
+    }
+
+    try {
+      validateEnv(invalidOriginEnv);
+    } catch (error) {
+      invalidOriginError = error;
+    }
+
+    // Assert
+    assert.ok(emptyProdError instanceof Error);
+    assert.match(emptyProdError.message, /- CORS_ORIGINS:/);
+    assert.ok(invalidOriginError instanceof Error);
+    assert.match(invalidOriginError.message, /- CORS_ORIGINS:/);
+  });
+
+  it('fails with a clear message when TRUST_PROXY or BODY_LIMIT is invalid', () => {
+    // Arrange
+    const rawEnv = { TRUST_PROXY: 'yes', BODY_LIMIT: '0' };
+    let caughtError: unknown;
+
+    // Act
+    try {
+      validateEnv(rawEnv);
+    } catch (error) {
+      caughtError = error;
+    }
+
+    // Assert
+    assert.ok(caughtError instanceof Error);
+    assert.match(caughtError.message, /- TRUST_PROXY:/);
+    assert.match(caughtError.message, /- BODY_LIMIT:/);
   });
 
   it('fails with a clear message when PORT is invalid', () => {
@@ -129,6 +199,7 @@ describe('env configuration', () => {
       HOST: '   ',
       PORT: 'abc',
       CLIENT_URL: 'invalid-url',
+      TRUST_PROXY: 'invalid-bool',
     };
     let caughtError: unknown;
 
@@ -145,6 +216,7 @@ describe('env configuration', () => {
     assert.match(caughtError.message, /- HOST:/);
     assert.match(caughtError.message, /- PORT:/);
     assert.match(caughtError.message, /- CLIENT_URL:/);
+    assert.match(caughtError.message, /- TRUST_PROXY:/);
   });
 
   it('resolves environment file paths in priority order and deduplicates identical directories', () => {
@@ -246,6 +318,8 @@ describe('env configuration', () => {
     const port: number = consumer.appConfig.get('PORT');
     const host: string = consumer.appConfig.get('HOST');
     const nodeEnv: 'development' | 'production' = consumer.appConfig.get('NODE_ENV');
+    const corsOrigins: string[] = consumer.appConfig.get('CORS_ORIGINS');
+    const trustProxy: boolean = consumer.appConfig.get('TRUST_PROXY');
     const inferredPort: number = consumer.configService.get('PORT', {
       infer: true,
     });
@@ -255,6 +329,8 @@ describe('env configuration', () => {
     assert.ok(port >= 1 && port <= 65535);
     assert.ok(host.length > 0);
     assert.ok(nodeEnv === 'development' || nodeEnv === 'production');
+    assert.ok(Array.isArray(corsOrigins));
+    assert.equal(typeof trustProxy, 'boolean');
     assert.equal(inferredPort, port);
 
     await moduleRef.close();

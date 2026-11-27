@@ -6,7 +6,8 @@
     "build": "nest build --builder swc",
     "dev": "nest start --builder swc --watch",
     "start": "node dist/main",
-    "test": "node --test \"dist/**/*.spec.js\"",
+    "test": "node --test \"dist/**/*.spec.js\" \"dist/**/*.e2e-spec.js\"",
+    "test:e2e": "node --test \"dist/**/*.e2e-spec.js\"",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
